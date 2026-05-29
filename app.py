@@ -44,4 +44,3 @@ if uploaded_file:
         )
 
         st.pyplot(fig)
-```
