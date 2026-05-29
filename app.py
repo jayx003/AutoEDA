@@ -16,7 +16,6 @@ Original file is located at
 # import pandas as pd
 # import matplotlib.pyplot as plt
 # import seaborn as sns
-# from ydata_profiling import ProfileReport
 # 
 # st.title("AutoEDA Platform")
 # 
@@ -62,21 +61,7 @@ Original file is located at
 # 
 #     st.subheader("Generating Profile Report")
 # 
-#     profile = ProfileReport(
-#         df,
-#         title="EDA Report",
-#         explorative=True
-#     )
-# 
-#     profile.to_file("EDA_Report.html")
-# 
-#     with open("EDA_Report.html", "rb") as file:
-#         st.download_button(
-#             label="Download HTML Report",
-#             data=file,
-#             file_name="EDA_Report.html",
-#             mime="text/html"
-#         )
+
 
 !streamlit run app.py &>/dev/null&
 
