@@ -1,46 +1,115 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-st.title("AutoEDA Platform")
+# COMPONENT IMPORTS
+from components.sidebar import render_sidebar
+from components.overview import render_overview
+from components.visualization import render_visualizations
+from components.preprocessing import render_preprocessing
+from components.landing import render_landing
 
-uploaded_file = st.file_uploader(
-    "Upload CSV File",
-    type=["csv"]
+# ============================================
+# PAGE CONFIG
+# ============================================
+
+st.set_page_config(
+    page_title="AutoEDA",
+    layout="wide"
 )
+
+# ============================================
+# SIDEBAR
+# ============================================
+
+uploaded_file = render_sidebar()
+
+# ============================================
+# IF DATASET IS UPLOADED
+# ============================================
 
 if uploaded_file:
 
+    # READ DATASET
     df = pd.read_csv(uploaded_file)
 
-    st.subheader("Dataset Preview")
-    st.dataframe(df.head())
+    # ============================================
+    # INITIALIZE SESSION STATE
+    # ============================================
 
-    st.subheader("Dataset Overview")
+    if "processed_df" not in st.session_state:
 
-    st.write("Rows:", df.shape[0])
-    st.write("Columns:", df.shape[1])
+        st.session_state.processed_df = df.copy()
 
-    st.subheader("Missing Values")
-    st.write(df.isnull().sum())
+    # NUMERIC COLUMNS
+    numeric_cols = df.select_dtypes(
+        include=['number']
+    ).columns
 
-    st.subheader("Statistical Summary")
-    st.dataframe(df.describe())
+    # ============================================
+    # UPDATE SIDEBAR WITH DATASET INFO
+    # ============================================
 
-    numeric_df = df.select_dtypes(include=['number'])
+    
 
-    if not numeric_df.empty:
+    # ============================================
+    # DOWNLOAD CLEANED DATASET
+    # ============================================
 
-        st.subheader("Correlation Heatmap")
+    st.sidebar.markdown("---")
 
-        fig, ax = plt.subplots(figsize=(10,6))
+    st.sidebar.subheader("Download Dataset")
 
-        sns.heatmap(
-            numeric_df.corr(),
-            annot=True,
-            cmap="coolwarm",
-            ax=ax
-        )
+    csv = st.session_state.processed_df.to_csv(
+        index=False
+    )
 
-        st.pyplot(fig)
+    st.sidebar.download_button(
+        label="Download Cleaned CSV",
+        data=csv,
+        file_name="cleaned_dataset.csv",
+        mime="text/csv"
+    )
+
+    # ============================================
+    # MAIN TABS
+    # ============================================
+
+    overview_tab, viz_tab, preprocess_tab = st.tabs(
+        [
+            "Overview",
+            "Visualizations",
+            "Preprocessing"
+        ]
+    )
+
+    # ============================================
+    # OVERVIEW TAB
+    # ============================================
+
+    with overview_tab:
+
+        render_overview(df)
+
+    # ============================================
+    # VISUALIZATION TAB
+    # ============================================
+
+    with viz_tab:
+
+        render_visualizations(df, numeric_cols)
+
+    # ============================================
+    # PREPROCESSING TAB
+    # ============================================
+
+    with preprocess_tab:
+
+        render_preprocessing(df)
+
+# ============================================
+# LANDING PAGE
+# ============================================
+
+else:
+
+    render_landing()
