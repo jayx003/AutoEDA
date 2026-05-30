@@ -1,10 +1,9 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-import seaborn as sns
+import plotly.express as px
 
 def render_visualizations(df, numeric_cols):
 
-    st.title("Data Visualizations")
+    st.title("Interactive Data Visualizations")
 
     # ============================================
     # HEATMAP
@@ -12,17 +11,19 @@ def render_visualizations(df, numeric_cols):
 
     st.markdown("## 1. Correlation Heatmap")
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    corr_matrix = df[numeric_cols].corr()
 
-    sns.heatmap(
-        df[numeric_cols].corr(),
-        annot=True,
-        cmap='coolwarm',
-        linewidths=0.5,
-        ax=ax
+    heatmap_fig = px.imshow(
+        corr_matrix,
+        text_auto=True,
+        aspect="auto",
+        color_continuous_scale="RdBu_r"
     )
 
-    st.pyplot(fig)
+    st.plotly_chart(
+        heatmap_fig,
+        use_container_width=True
+    )
 
     st.markdown("---")
 
@@ -30,24 +31,24 @@ def render_visualizations(df, numeric_cols):
     # HISTOGRAM
     # ============================================
 
-    st.markdown("## 2. Histogram")
+    st.markdown("## 2. Interactive Histogram")
 
     selected_col = st.selectbox(
         "Select Numeric Column",
         numeric_cols
     )
 
-    fig2, ax2 = plt.subplots(figsize=(10, 5))
-
-    sns.histplot(
-        df[selected_col],
-        kde=True,
-        ax=ax2
+    hist_fig = px.histogram(
+        df,
+        x=selected_col,
+        nbins=30,
+        title=f"Distribution of {selected_col}"
     )
 
-    ax2.set_title(f"Histogram of {selected_col}")
-
-    st.pyplot(fig2)
+    st.plotly_chart(
+        hist_fig,
+        use_container_width=True
+    )
 
     st.markdown("---")
 
@@ -55,15 +56,52 @@ def render_visualizations(df, numeric_cols):
     # BOXPLOT
     # ============================================
 
-    st.markdown("## 3. Boxplot")
+    st.markdown("## 3. Interactive Boxplot")
 
-    fig3, ax3 = plt.subplots(figsize=(10, 5))
-
-    sns.boxplot(
-        y=df[selected_col],
-        ax=ax3
+    box_fig = px.box(
+        df,
+        y=selected_col,
+        title=f"Boxplot of {selected_col}"
     )
 
-    ax3.set_title(f"Boxplot of {selected_col}")
+    st.plotly_chart(
+        box_fig,
+        use_container_width=True
+    )
 
-    st.pyplot(fig3)
+    st.markdown("---")
+
+    # ============================================
+    # SCATTER PLOT
+    # ============================================
+
+    st.markdown("## 4. Interactive Scatter Plot")
+
+    x_axis = st.selectbox(
+        "Select X-Axis",
+        numeric_cols,
+        key="x_axis"
+    )
+
+    y_axis = st.selectbox(
+        "Select Y-Axis",
+        numeric_cols,
+        key="y_axis"
+    )
+
+    scatter_fig = px.scatter(
+        df,
+        x=x_axis,
+        y=y_axis,
+        hover_data=df.columns,
+        title=f"{x_axis} vs {y_axis}"
+    )
+
+    scatter_fig.update_layout(
+        height=600
+    )
+
+    st.plotly_chart(
+        scatter_fig,
+        use_container_width=True
+    )
